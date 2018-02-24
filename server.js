@@ -35,52 +35,41 @@ router.post('/message', (request, response) => {
   response.end(`${messages[messages.length - 1].id}`);
 })
 
+
 router.get('/messages', (request, response) => {
+  const messagesJSON = JSON.stringify(messages)
+  console.log(messagesJSON)
+
+  if (request.url.includes("?encrypt=true")) {
+    response.setHeader('Content-Type', 'text/plain; charset=utf-8');
+
+    bcrypt.hash(messagesJSON, saltRounds, (err, hashed) => {
+      console.log(hashed)      
+      response.end(hashed);
+    });
+  };
+
   response.setHeader('Content-Type', 'application/json; charset=utf-8');
-  response.end(JSON.stringify(messages));
+  response.end(messagesJSON);
 });
 
 router.get('/message/:id', (request, response) => {
-  let message;
-  try {
-    message = messages[request.params.id - 1];  
-  } catch(err) {
-    response.end(err);
-  }
-
-  
+  const message = messages[request.params.id - 1];
   const messageJSON = JSON.stringify(message);
 
-  if (request.url.includes("encrypt=true")) {
-
+  if (request.url.includes("?encrypt=true")) {
+    console.log("setting text/plain")
     response.setHeader('Content-Type', 'text/plain; charset=utf-8');
 
-    bcrypt.hash(messageJSON, saltRounds, function(err, hashed) {
+    bcrypt.hash(messageJSON, saltRounds, (err, hashed) => {
+      console.log(hashed)
       response.end(hashed);
-    })
+    });
+  };
 
-  } else if (!request.url.includes("encrypt=true")){
-    response.setHeader('Content-Type', 'application/json; charset=utf-8');
-    response.end(messageJSON);
-  } 
+  response.setHeader('Content-Type', 'application/json; charset=utf-8');
+  response.end(messageJSON);
 });
-
-// router.get('/message/:id?encrypt=true', (request, response) => {
-//   console.log("HIT");
-//   console.log(request.params)
-//   let messageToEncrypt = messages.find(item => {
-//     return item.id == request.params.id
-//   });
-
-//   let sendThis = bcrypt.hash(messageToEncrypt, 10, function(err, hash) {
-//     console.log(err)
-//     console.log(hash)
-//     return hash
-//   })();
-
-//   response.setHeader('Content-Type', 'text/plain; charset=utf-8');
-//   response.end(JSON.stringify(sendThis));
-// });
 
 const server = http.createServer((request, response) => {
   router(request, response, finalhandler(request, response));
