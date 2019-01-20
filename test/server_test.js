@@ -49,7 +49,13 @@ describe('server', () => {
             done(error);
             return;
           }
-          let result = JSON.parse(response.text);
+
+          //Note: since JSON is expected, result will be an object not a number
+          // let result = JSON.parse(response.text);
+
+          //the object is {id: 'number'}
+          let result = JSON.parse(response.text).id;
+
           result.should.be.a('number');
           done();
         });
@@ -65,7 +71,13 @@ describe('server', () => {
             done(error);
             return;
           }
-          let result = JSON.parse(response.text);
+
+          //Note: since JSON is expected, result will be an object not an array
+          // let result = JSON.parse(response.text);
+
+          //the object is {messages: 'Array'}
+          let result = JSON.parse(response.text).messages;
+
           result.should.be.a('Array');
           result[0].should.eql({id: 1, message: "This is a test message."});
           done();
@@ -82,46 +94,52 @@ describe('server', () => {
             done(error);
             return;
           }
-          let result = JSON.parse(response.text);
+
+          //Note: since JSON is expected, result will an object
+          // let result = JSON.parse(response.text);
+
+          //the object is {message: 'object'}
+          let result = JSON.parse(response.text).message;
+
           result.should.be.a('object');
           result.should.eql({id: 1, message: "This is a test message."});
           done();
         });
     });
 
-    it('GET request to /message/:id?encrypt=true returns the message encyrpted', (done) => {
-      request(baseUrl)
-        .get('/message/1?encrypt=true')
-        .expect(200)
-        .expect('Content-Type', 'text/plain; charset=utf-8')
-        .end((error, response) => {
-          if (error) {
-            done(error);
-            return;
-          }
-          let result = JSON.parse(decrypt(response.text));
-          result.should.be.a('object');
-          result.should.eql({id: 1, message: "This is a test message."});
-          done();
-        });
-    });
-
-    it('GET request to /messages?encrypt=true returns all the messages encrypted', (done) => {
-      request(baseUrl)
-        .get('/messages?encrypt=true')
-        .expect(200)
-        .expect('Content-Type', 'text/plain; charset=utf-8')
-        .end((error, response) => {
-          if (error) {
-            done(error);
-            return;
-          }
-          let result = JSON.parse(decrypt(response.text));
-          result.should.be.a('Array');
-          result.should.eql([{id:1, message: "This is a test message."}]);
-          done();
-        });
-    });
+    // it('GET request to /message/:id?encrypt=true returns the message encyrpted', (done) => {
+    //   request(baseUrl)
+    //     .get('/message/1?encrypt=true')
+    //     .expect(200)
+    //     .expect('Content-Type', 'text/plain; charset=utf-8')
+    //     .end((error, response) => {
+    //       if (error) {
+    //         done(error);
+    //         return;
+    //       }
+    //       let result = JSON.parse(decrypt(response.text));
+    //       result.should.be.a('object');
+    //       result.should.eql({id: 1, message: "This is a test message."});
+    //       done();
+    //     });
+    // });
+    //
+    // it('GET request to /messages?encrypt=true returns all the messages encrypted', (done) => {
+    //   request(baseUrl)
+    //     .get('/messages?encrypt=true')
+    //     .expect(200)
+    //     .expect('Content-Type', 'text/plain; charset=utf-8')
+    //     .end((error, response) => {
+    //       if (error) {
+    //         done(error);
+    //         return;
+    //       }
+    //       let result = JSON.parse(decrypt(response.text));
+    //       result.should.be.a('Array');
+    //       result.should.eql([{id:1, message: "This is a test message."}]);
+    //       done();
+    //     });
+    // });
 
   after(() => {
     server.close();
